@@ -1534,7 +1534,7 @@ contract MasterChef is Ownable {
 
     constructor(
         CakeToken _cake,
-        SyrupBar _syrup,
+        SyrupBar _syrup
     ) public {
         cake = _cake;
         syrup = _syrup;
