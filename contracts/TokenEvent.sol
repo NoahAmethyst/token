@@ -1509,8 +1509,6 @@ contract MasterChef is Ownable {
     CakeToken public cake;
     // The SYRUP TOKEN!
     SyrupBar public syrup;
-    // Dev address.
-    address public devaddr;
     // CAKE tokens created per block.
     uint256 public cakePerBlock;
     // Bonus muliplier for early cake makers.
@@ -1537,11 +1535,9 @@ contract MasterChef is Ownable {
     constructor(
         CakeToken _cake,
         SyrupBar _syrup,
-        address _devaddr
     ) public {
         cake = _cake;
         syrup = _syrup;
-        devaddr = _devaddr;
         cakePerBlock = 8680;
         startBlock = block.number;
         doubleDeadBlock = startBlock.add(15 * 24 * 60 * 12);
@@ -1677,7 +1673,6 @@ contract MasterChef is Ownable {
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
         uint256 cakeReward = multiplier.mul(cakePerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        cake.mint(devaddr, cakeReward.div(10));
         cake.mint(address(syrup), cakeReward);
         pool.accCakePerShare = pool.accCakePerShare.add(cakeReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
@@ -1783,12 +1778,6 @@ contract MasterChef is Ownable {
     // Safe cake transfer function, just in case if rounding error causes pool to not have enough CAKEs.
     function safeCakeTransfer(address _to, uint256 _amount) internal {
         syrup.safeCakeTransfer(_to, _amount);
-    }
-
-    // Update dev address by the previous dev.
-    function dev(address _devaddr) public {
-        require(msg.sender == devaddr, "dev: wut?");
-        devaddr = _devaddr;
     }
 
     function setCakePerBlock(uint256 _cakePerBlock) public onlyOwner {
