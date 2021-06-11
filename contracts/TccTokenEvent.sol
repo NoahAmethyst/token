@@ -1552,8 +1552,16 @@ contract MasterChef is Ownable {
         }));
 
         totalAllocPoint = 1000;
-
     }
+
+    function setNewStartBlock(uint256 _pid) public onlyOwner {
+        PoolInfo storage pool = poolInfo[_pid];
+        startBlock = block.number;
+        doubleDeadBlock = startBlock.add(15 * 24 * 60 * 12);
+        endBlock = startBlock.add(33 * 24 * 60 * 12);
+        pool.lastRewardBlock = startBlock;
+    }
+
 
     function updateMultiplier(uint256 multiplierNumber) public onlyOwner {
         BONUS_MULTIPLIER = multiplierNumber;

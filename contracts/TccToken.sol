@@ -1,7 +1,4 @@
-/**
- *Submitted for verification at BscScan.com on 2021-04-23
-*/
-
+//SPDX-License-Identifier: MIT
 /**
  *Submitted for verification at hecoinfo.com on 2021-02-03
 */
@@ -274,12 +271,8 @@ contract ERC20 is Context, IERC20 {
         return mintThreshold;
     }
 
-    function _decimals() public view returns (uint8){
-        return _decimals;
-    }
-
-    function _setupDecimals(uint8 decimals){
-        _decimals=decimals;
+    function _setupDecimals(uint8 decimals_) internal {
+        _decimals = decimals_;
     }
 
 
@@ -292,7 +285,7 @@ abstract contract ERC20Pausable is ERC20, Pausable {
         require(!paused(), "ERC20Pausable: token transfer while paused");
     }
 }
-contract ERC20Template is ERC20Pausable {
+contract StandardToken is ERC20Pausable {
     address factory;
     mapping(address => bool) operators;
     mapping(address => bool) pausers;
@@ -300,9 +293,8 @@ contract ERC20Template is ERC20Pausable {
         factory=msg.sender;
         operators[factory] = true;
         pausers[factory] = true;
-        _setupDecimals(decimal)
-        uint256 bigDe = decimal;
-        _setupThreshold(thresholdAmount.mul(10**decimal));
+        _setupDecimals(decimal);
+        _setupThreshold(thresholdAmount);
     }
 
 
@@ -310,6 +302,7 @@ contract ERC20Template is ERC20Pausable {
         require(msg.sender==factory,"only Factory");
         _;
     }
+
     modifier onlyOperator(){
         require(operators[msg.sender],"not allowed");
         _;
