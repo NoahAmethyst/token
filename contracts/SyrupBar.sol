@@ -2,11 +2,7 @@
 /**
  *Submitted for verification at BscScan.com on 2021-05-04
 */
-
 pragma solidity 0.6.12;
-
-
-// 
 /*
  * @dev Provides information about the current execution context, including the
  * sender of the transaction and its data. While these are generally available

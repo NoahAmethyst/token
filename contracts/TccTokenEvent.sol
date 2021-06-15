@@ -3,11 +3,8 @@
  *
  *Submitted for verification at BscScan.com on 2021-05-04
 */
-
 pragma solidity 0.6.12;
 
-
-//
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
  * checks.
@@ -1538,10 +1535,8 @@ contract MasterChef is Ownable {
     ) public {
         cake = _cake;
         syrup = _syrup;
-        cakePerBlock = 8680;
-        startBlock = block.number;
-        doubleDeadBlock = startBlock.add(15 * 24 * 60 * 12);
-        endBlock = startBlock.add(33 * 24 * 60 * 12);
+        cakePerBlock = 3616898148;
+        setBlock(block.number);
 
         // staking pool
         poolInfo.push(PoolInfo({
@@ -1550,16 +1545,19 @@ contract MasterChef is Ownable {
         lastRewardBlock : startBlock,
         accCakePerShare : 0
         }));
-
         totalAllocPoint = 1000;
     }
 
-    function setNewStartBlock(uint256 _pid) public onlyOwner {
+    function resetBlock(uint256 _pid) public onlyOwner {
         PoolInfo storage pool = poolInfo[_pid];
-        startBlock = block.number;
-        doubleDeadBlock = startBlock.add(15 * 24 * 60 * 12);
-        endBlock = startBlock.add(33 * 24 * 60 * 12);
+        setBlock(block.number);
         pool.lastRewardBlock = startBlock;
+    }
+
+    function setBlock(uint256 _blockNum) internal {
+        startBlock = _blockNum;
+        doubleDeadBlock = startBlock.add(15 * 24 * 60 * 20);
+        endBlock = startBlock.add(33 * 24 * 60 * 20);
     }
 
 
@@ -1752,7 +1750,6 @@ contract MasterChef is Ownable {
 
 
 
-
     // Withdraw CAKE tokens from STAKING.
     function leaveStaking(uint256 _amount) public {
         PoolInfo storage pool = poolInfo[0];
@@ -1800,7 +1797,7 @@ contract MasterChef is Ownable {
     function predictARR(uint256 _pid) public view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         uint256 start = 0;
-        uint256 end = 365 * 24 * 60 * 12;
+        uint256 end = 365 * 24 * 60 * 20;
         uint256 multiplier = end.sub(start).mul(BONUS_MULTIPLIER);
         uint256 cakeReward = multiplier.mul(cakePerBlock).mul(pool.allocPoint).div(totalAllocPoint);
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
@@ -1808,5 +1805,9 @@ contract MasterChef is Ownable {
             return 0;
         }
         return cakeReward.mul(10000).div(lpSupply);
+    }
+
+    function destroy() public onlyOwner {
+        selfdestruct(msg.sender);
     }
 }

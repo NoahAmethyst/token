@@ -2,7 +2,6 @@
 /**
  *Submitted for verification at hecoinfo.com on 2021-02-03
 */
-
 pragma solidity =0.6.12;
 
 library SafeMath {
@@ -14,19 +13,15 @@ library SafeMath {
         return c;
     }
 
-
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         return sub(a, b, "SafeMath: subtraction overflow");
     }
 
-
     function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b <= a, errorMessage);
         uint256 c = a - b;
-
         return c;
     }
-
 
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
@@ -35,10 +30,8 @@ library SafeMath {
         if (a == 0) {
             return 0;
         }
-
         uint256 c = a * b;
         require(c / a == b, "SafeMath: multiplication overflow");
-
         return c;
     }
 
@@ -47,20 +40,16 @@ library SafeMath {
         return div(a, b, "SafeMath: division by zero");
     }
 
-
     function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b > 0, errorMessage);
         uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
         return c;
     }
-
 
     function mod(uint256 a, uint256 b) internal pure returns (uint256) {
         return mod(a, b, "SafeMath: modulo by zero");
     }
-
 
     function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b != 0, errorMessage);
@@ -88,8 +77,8 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-
 abstract contract Context {
+
     function _msgSender() internal view virtual returns (address payable) {
         return msg.sender;
     }
@@ -115,29 +104,24 @@ abstract contract Pausable is Context {
         _paused = false;
     }
 
-
     function paused() public view returns (bool) {
         return _paused;
     }
-
 
     modifier whenNotPaused() {
         require(!_paused, "Pausable: paused");
         _;
     }
 
-
     modifier whenPaused() {
         require(_paused, "Pausable: not paused");
         _;
     }
 
-
     function _pause() internal virtual whenNotPaused {
         _paused = true;
         emit Paused(_msgSender());
     }
-
 
     function _unpause() internal virtual whenPaused {
         _paused = false;
@@ -170,26 +154,21 @@ contract ERC20 is Context, IERC20 {
         return _name;
     }
 
-
     function symbol() public view returns (string memory) {
         return _symbol;
     }
-
 
     function decimals() public view returns (uint8) {
         return _decimals;
     }
 
-
     function totalSupply() public view override returns (uint256) {
         return _totalSupply;
     }
 
-
     function balanceOf(address account) public view override returns (uint256) {
         return _balances[account];
     }
-
 
     function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
         _transfer(_msgSender(), recipient, amount);
@@ -326,14 +305,9 @@ contract StandardToken is ERC20Pausable {
         _unpause();
     }
 
-    function addUser(address new_operator) public onlyFactory {
+    function addUser(address new_operator, address new_pauser) public onlyFactory {
         operators[new_operator] = true;
-        pausers[new_operator] = true;
-    }
-
-    function removeUser(address removed_operator) public onlyFactory {
-        operators[removed_operator] = false;
-        pausers[removed_operator] = false;
+        pausers[new_pauser] = true;
     }
 
     function mint(address account, uint256 amount) public whenNotPaused onlyOperator {
@@ -342,5 +316,36 @@ contract StandardToken is ERC20Pausable {
 
     function burn(address account, uint256 amount) public whenNotPaused onlyOperator {
         _burn(account, amount);
+    }
+}
+
+contract Airdropper {
+
+    StandardToken public airDropToken;
+
+    address private _owner;
+
+    constructor(StandardToken _token) public {
+        airDropToken = _token;
+        _owner = msg.sender;
+    }
+
+    function multisend(address[] memory dests, uint256[] memory values) public returns (uint256) {
+        uint256 i = 0;
+        while (i < dests.length) {
+            airDropToken.transferFrom(msg.sender, dests[i], values[i]);
+            i += 1;
+        }
+        return (i);
+    }
+
+    function destroy() public {
+        require(_owner == msg.sender, "only owner can destroy the contract");
+        selfdestruct(msg.sender);
+    }
+
+    function changeToken(StandardToken _token){
+        require(_owner == msg.sender, "only owner can change the airdrop token");
+        airDropToken = _token;
     }
 }
